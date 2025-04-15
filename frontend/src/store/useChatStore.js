@@ -67,4 +67,3 @@ export const useChatStore = create((set, get) => ({     //zustand gives us this 
 
   setSelectedUser: (selectedUser) => set({ selectedUser }),
 }))
-

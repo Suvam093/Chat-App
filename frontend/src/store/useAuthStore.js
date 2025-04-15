@@ -3,7 +3,7 @@ import {axiosInstance} from '../lib/axios';
 import {toast} from 'react-hot-toast';
 import {io} from 'socket.io-client'; 
 
-const BAEE_URL = "http://localhost:5001"; // Replace with your backend URL
+const BAEE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/"; // Replace with your backend URL
 
 export const useAuthStore = create((set, get) => ({       //get is used to access the state of the store in specific functions
     authUser: null,
