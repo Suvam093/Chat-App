@@ -7,7 +7,7 @@ import LoginPage from './pages/LoginPage.jsx'
 import SettingsPage from './pages/SettingsPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import { useAuthStore } from './store/useAuthStore.js'
-import { useThemeStore } from './store/usethemeStore.js'
+import { useThemeStore } from './store/useThemeStore.js'
 import { useEffect } from 'react'
 import {Loader} from 'lucide-react'
 import { Toaster } from 'react-hot-toast'           //to make the error messages look nice on the screen
