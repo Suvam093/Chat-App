@@ -1,6 +1,9 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import cloudinary from "../lib/cloudinary.js"; 
+import {io, getReceiverSocketId } from "../lib/socket.js";
+
+
 
 export const getUsersForSidebar = async(req , res) => {
     try {
@@ -43,7 +46,7 @@ export const getMessages = async(req , res) => {
 export const sendMessage = async(req , res) => {
     try {
         const {text, image} = req.body;
-        const receiverId = req.params;
+        const receiverId = req.params.id;
         const senderId = req.user._id;
 
         let imageURL;
@@ -61,14 +64,14 @@ export const sendMessage = async(req , res) => {
         })
         await newMessage.save(); 
 
-        //todo : realtime message sending using socket io will go here 
+        const receiverSocketId = getReceiverSocketId(receiverId);
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit("newMessage", newMessage);    //io.emit will broadcast the message to all the connected clients thats why we are using io.to(receiverSocketId) to send the message to the specific user
+        }
 
         res.status(201).json(newMessage);
-
     } catch (error) {
-        console.log("error in sendMessage controller", error.message);
-        res.status(500).json({
-            message: "Internal Server Error",
-        });
+        console.log("Error in sendMessage controller: ", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
 }

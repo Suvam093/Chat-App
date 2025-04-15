@@ -24,12 +24,14 @@ const ChatContainer = () => {
 
     subscribeToMessages();
 
-    return () => unsubscribeFromMessages();
+    return () => unsubscribeFromMessages();   //this will unsubscribe from the messages when the component unmounts used for cleanup purposes
   }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
   useEffect(() => {
     if (messageEndRef.current && messages) {
-      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+      messageEndRef.current.scrollIntoView({ 
+        behavior: "smooth" }
+      );
     }
   }, [messages]);
 
@@ -55,7 +57,7 @@ const ChatContainer = () => {
           <div
             key={message._id}
             className={`chat ${message.sender === authUser._id ? "chat-end" : "chat-start"}`}    //in the schema we named the senderId and the receiverId as sender and receiver thats why we are using sender here 
-            ref={messageEndRef}
+            ref={messageEndRef}           //auto scroll to the bottom
           >
             <div className=" chat-image avatar">
               <div className="size-10 rounded-full border">

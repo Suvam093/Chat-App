@@ -16,7 +16,7 @@ import { Toaster } from 'react-hot-toast'           //to make the error messages
 const App = () => {
 
   const {authUser,checkAuth, isCheckingAuth, onlineUsers } = useAuthStore()
-  console.log(onlineUsers)
+  console.log("onlineUsers" , onlineUsers)
 
   const { theme } = useThemeStore();
 

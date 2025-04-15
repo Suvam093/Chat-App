@@ -1,15 +1,19 @@
 import {create} from 'zustand';
 import {axiosInstance} from '../lib/axios';
 import {toast} from 'react-hot-toast';
+import {io} from 'socket.io-client'; 
 
-export const useAuthStore = create((set) => ({
+const BAEE_URL = "http://localhost:5001"; // Replace with your backend URL
+
+export const useAuthStore = create((set, get) => ({       //get is used to access the state of the store in specific functions
     authUser: null,
 
     isSigningUp: false,
     isLoggingIn: false,
     isUpdatingProfile: false,
-    onlineUsers: [],
+    onlineUsers: [],             //this is for keeping track of the online users
     isCheckingAuth: true,
+    socket: null,                //This state is for the users online status
 
     checkAuth : async() => {
         try {
@@ -18,6 +22,7 @@ export const useAuthStore = create((set) => ({
             set({
                 authUser: res.data
             })
+            get().connectSocket() // Call the connectSocket function after checking auth
         } catch (error) {
             console.log("Error in checking auth", error);
             set({
@@ -40,6 +45,8 @@ export const useAuthStore = create((set) => ({
 
             toast.success("Account created successfully! Please log in to continue.");
 
+            get().connectSocket() 
+
         } catch (error) {
           toast.error(error.response.data.message || "Error signing up. Please try again.");
         } finally {
@@ -54,6 +61,8 @@ export const useAuthStore = create((set) => ({
             set({ authUser: res.data });
 
             toast.success("Logged in successfully!");
+
+            get().connectSocket()
             
         } catch (error) {
             toast.error(error.response.data.message || "Error logging in. Please try again.");
@@ -67,6 +76,8 @@ export const useAuthStore = create((set) => ({
         try {
             await axiosInstance.post('/auth/logout');
             set({ authUser: null });
+            toast.success("Logged out successfully!");
+            get().disconnectSocket()
         }
         catch (error) {
             console.log(error.response.data.message);
@@ -86,4 +97,26 @@ export const useAuthStore = create((set) => ({
           set({ isUpdatingProfile: false });
         }
     },
+
+    connectSocket: () =>{
+        const {authUser} = get();
+        if (!authUser || get().socket?.connected) return; // Don't connect if not logged in or dont build a new connection if connection is already there
+
+        const socket  = io(BAEE_URL,{
+            query:{
+                userId: authUser._id, // Send userId as a query parameter for updating the online users in the backend
+            }
+        });
+        socket.connect();
+        set({ socket: socket }); 
+
+        //listening for the getOnlineUsers event from the backend
+        socket.on("getOnlineUsers", (userId) => {
+            set({ onlineUsers: userId });
+        });
+    },
+
+    disconnectSocket: () => {
+        if(get().socket.connected)  get().socket.disconnect()
+    }
 }));
